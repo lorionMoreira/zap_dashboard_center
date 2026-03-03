@@ -118,3 +118,22 @@
 .login-link a:hover {
   text-decoration: underline;
 }
+
+.auth-link-button {
+  border: 0;
+  background: none;
+  color: #667eea;
+  font-weight: 600;
+  font-size: 0.95em;
+  padding: 0;
+  cursor: pointer;
+}
+
+.auth-link-button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.auth-link-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

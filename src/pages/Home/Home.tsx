@@ -1,8 +1,14 @@
 import { useAuth } from '../../context/AuthContext'
+import { navigateTo } from '../../utils/navigation'
 import './Home.css'
 
 export default function Home() {
   const { user, logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+    navigateTo('/login', true)
+  }
 
   return (
     <div className="home-container">
@@ -11,7 +17,7 @@ export default function Home() {
           <h1>Dashboard Center</h1>
           <div className="user-section">
             <span className="user-name">Olá, {user?.name}!</span>
-            <button onClick={logout} className="btn-logout">
+            <button onClick={handleLogout} className="btn-logout">
               Sair
             </button>
           </div>

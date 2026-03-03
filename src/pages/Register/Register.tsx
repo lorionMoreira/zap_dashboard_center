@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { navigateTo } from '../../utils/navigation'
 import './Register.css'
 
 export default function Register() {
@@ -30,7 +31,7 @@ export default function Register() {
 
     try {
       await register(name, email, password)
-      // Redirect will be handled by AuthContext
+      navigateTo('/dashboard', true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao criar conta')
     } finally {
@@ -107,7 +108,15 @@ export default function Register() {
         </form>
 
         <p className="login-link">
-          Já tem uma conta? <a href="/login">Faça login</a>
+          Já tem uma conta?{' '}
+          <button
+            type="button"
+            className="auth-link-button"
+            onClick={() => navigateTo('/login')}
+            disabled={loading}
+          >
+            Faça login
+          </button>
         </p>
       </div>
     </div>

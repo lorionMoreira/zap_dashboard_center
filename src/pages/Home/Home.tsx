@@ -1,13 +1,15 @@
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { navigateTo } from '../../utils/navigation'
+import { ROUTES } from '../../routes/paths'
 import './Home.css'
 
 export default function Home() {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
   const handleLogout = () => {
     logout()
-    navigateTo('/login', true)
+    navigate(ROUTES.login, { replace: true })
   }
 
   return (
@@ -27,7 +29,9 @@ export default function Home() {
       <main className="main-content">
         <div className="welcome-card">
           <h2>Bem-vindo ao Dashboard!</h2>
-          <p>Você está logado como: <strong>{user?.email}</strong></p>
+          <p>
+            Você está logado como: <strong>{user?.email}</strong>
+          </p>
           <p className="info-text">
             Este é um template inicial. Você pode começar a adicionar seus componentes e páginas aqui.
           </p>

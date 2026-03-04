@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { navigateTo } from '../../utils/navigation'
+import { ROUTES } from '../../routes/paths'
 import './Login.css'
 
 export default function Login() {
@@ -9,6 +10,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -17,7 +19,7 @@ export default function Login() {
 
     try {
       await login(email, password)
-      navigateTo('/dashboard', true)
+      navigate(ROUTES.dashboard, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao fazer login')
     } finally {
@@ -30,9 +32,9 @@ export default function Login() {
       <div className="login-card">
         <h1>Dashboard Center</h1>
         <h2>Login</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -67,14 +69,17 @@ export default function Login() {
 
         <p className="register-link">
           Não tem uma conta?{' '}
-          <button
-            type="button"
+          <Link
+            to={ROUTES.register}
             className="auth-link-button"
-            onClick={() => navigateTo('/register')}
-            disabled={loading}
+            onClick={(e) => {
+              if (loading) {
+                e.preventDefault()
+              }
+            }}
           >
             Cadastre-se
-          </button>
+          </Link>
         </p>
       </div>
     </div>

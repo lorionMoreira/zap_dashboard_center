@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { navigateTo } from '../../utils/navigation'
+import { ROUTES } from '../../routes/paths'
 import './Register.css'
 
 export default function Register() {
@@ -11,12 +12,12 @@ export default function Register() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { register } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
 
-    // Validations
     if (password !== confirmPassword) {
       setError('As senhas não coincidem')
       return
@@ -31,7 +32,7 @@ export default function Register() {
 
     try {
       await register(name, email, password)
-      navigateTo('/dashboard', true)
+      navigate(ROUTES.dashboard, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao criar conta')
     } finally {
@@ -44,9 +45,9 @@ export default function Register() {
       <div className="register-card">
         <h1>Dashboard Center</h1>
         <h2>Criar Conta</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">Nome Completo</label>
@@ -109,14 +110,17 @@ export default function Register() {
 
         <p className="login-link">
           Já tem uma conta?{' '}
-          <button
-            type="button"
+          <Link
+            to={ROUTES.login}
             className="auth-link-button"
-            onClick={() => navigateTo('/login')}
-            disabled={loading}
+            onClick={(e) => {
+              if (loading) {
+                e.preventDefault()
+              }
+            }}
           >
             Faça login
-          </button>
+          </Link>
         </p>
       </div>
     </div>

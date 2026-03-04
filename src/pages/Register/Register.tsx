@@ -5,7 +5,7 @@ import { ROUTES } from '../../routes/paths'
 import './Register.css'
 
 export default function Register() {
-  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -31,7 +31,7 @@ export default function Register() {
     setLoading(true)
 
     try {
-      await register(name, email, password)
+      await register(username, email, password)
       navigate(ROUTES.dashboard, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao criar conta')
@@ -50,13 +50,13 @@ export default function Register() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Nome Completo</label>
+            <label htmlFor="username">Usuário</label>
             <input
               type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Seu nome"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="seu_usuario"
               required
               disabled={loading}
             />

@@ -1,100 +1,90 @@
+import { isAxiosError } from 'axios'
 import { apiConfig } from '../config/api'
-
-interface User {
-  id: string
-  name: string
-  email: string
-}
-
-interface LoginResponse {
-  user: User
-  token: string
-}
-
-interface RegisterResponse {
-  user: User
-  token: string
-}
+import apiClient from '../config/axios'
+import { AuthApiResponse, User } from '../interfaces/auth'
 
 class AuthService {
   private readonly TOKEN_KEY = 'auth_token'
   private readonly USER_KEY = 'auth_user'
 
-  async login(email: string, password: string): Promise<User> {
-    try {
-      const response = await fetch(`${apiConfig.baseURL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
+  private getAxiosErrorMessage(error: unknown, fallbackMessage: string): string {
+    if (!isAxiosError(error)) {
+      return fallbackMessage
+    }
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Falha ao fazer login')
-      }
+    const data = error.response?.data as { message?: string; error?: string } | undefined
+    return data?.message || data?.error || error.message || fallbackMessage
+  }
 
-      const data: LoginResponse = await response.json()
-      
-      // Store token and user
-      localStorage.setItem(this.TOKEN_KEY, data.token)
-      localStorage.setItem(this.USER_KEY, JSON.stringify(data.user))
-      
-      return data.user
-    } catch (error) {
-      // For development: simulate login without API
-      if (apiConfig.mockAuth) {
-        const mockUser: User = {
-          id: '1',
-          name: 'Usuário Demo',
-          email: email,
-        }
-        localStorage.setItem(this.TOKEN_KEY, 'mock-token-' + Date.now())
-        localStorage.setItem(this.USER_KEY, JSON.stringify(mockUser))
-        return mockUser
-      }
-      
-      throw error
+  private mapApiResponseToUser(data: AuthApiResponse, fallbackEmail = ''): User {
+    return {
+      id: data.username,
+      name: data.username,
+      username: data.username,
+      email: data.email || fallbackEmail,
+      salt: data.salt,
     }
   }
 
-  async register(name: string, email: string, password: string): Promise<User> {
+  async login(username: string, password: string): Promise<User> {
     try {
-      const response = await fetch(`${apiConfig.baseURL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      })
+      const response = await apiClient.post<AuthApiResponse>(
+        '/auth/entry',
+        { username, password },
+      )
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Falha ao criar conta')
-      }
+      const data = response.data
+      const user = this.mapApiResponseToUser(data)
 
-      const data: RegisterResponse = await response.json()
-      
-      // Store token and user
       localStorage.setItem(this.TOKEN_KEY, data.token)
-      localStorage.setItem(this.USER_KEY, JSON.stringify(data.user))
-      
-      return data.user
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user))
+
+      return user
     } catch (error) {
-      // For development: simulate registration without API
       if (apiConfig.mockAuth) {
         const mockUser: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          name: name,
-          email: email,
+          id: username,
+          name: username,
+          username,
+          email: '',
         }
-        localStorage.setItem(this.TOKEN_KEY, 'mock-token-' + Date.now())
+        localStorage.setItem(this.TOKEN_KEY, `mock-token-${Date.now()}`)
         localStorage.setItem(this.USER_KEY, JSON.stringify(mockUser))
         return mockUser
       }
-      
-      throw error
+
+      throw new Error(this.getAxiosErrorMessage(error, 'Falha ao fazer login'))
+    }
+  }
+
+  async register(username: string, email: string, password: string): Promise<User> {
+    try {
+      const response = await apiClient.post<AuthApiResponse>(
+        '/auth/register',
+        { username, password, email },
+      )
+
+      const data = response.data
+      const user = this.mapApiResponseToUser(data, email)
+
+      localStorage.setItem(this.TOKEN_KEY, data.token)
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user))
+
+      return user
+    } catch (error) {
+      if (apiConfig.mockAuth) {
+        const mockUser: User = {
+          id: username,
+          name: username,
+          username,
+          email,
+        }
+        localStorage.setItem(this.TOKEN_KEY, `mock-token-${Date.now()}`)
+        localStorage.setItem(this.USER_KEY, JSON.stringify(mockUser))
+        return mockUser
+      }
+
+      throw new Error(this.getAxiosErrorMessage(error, 'Falha ao criar conta'))
     }
   }
 
@@ -106,7 +96,7 @@ class AuthService {
   async getCurrentUser(): Promise<User | null> {
     const userStr = localStorage.getItem(this.USER_KEY)
     const token = localStorage.getItem(this.TOKEN_KEY)
-    
+
     if (!userStr || !token) {
       return null
     }

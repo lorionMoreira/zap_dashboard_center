@@ -1,20 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService } from '../services/authService'
-
-interface User {
-  id: string
-  name: string
-  email: string
-}
-
-interface AuthContextType {
-  user: User | null
-  loading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string) => Promise<void>
-  logout: () => void
-  isAuthenticated: boolean
-}
+import { AuthContextType, User } from '../interfaces/auth'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -23,7 +9,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkAuth = async () => {
       try {
         const currentUser = await authService.getCurrentUser()
@@ -40,13 +25,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth()
   }, [])
 
-  const login = async (email: string, password: string) => {
-    const userData = await authService.login(email, password)
+  const login = async (username: string, password: string) => {
+    const userData = await authService.login(username, password)
     setUser(userData)
   }
 
-  const register = async (name: string, email: string, password: string) => {
-    const userData = await authService.register(name, email, password)
+  const register = async (username: string, email: string, password: string) => {
+    const userData = await authService.register(username, email, password)
     setUser(userData)
   }
 

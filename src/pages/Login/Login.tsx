@@ -5,7 +5,7 @@ import { ROUTES } from '../../routes/paths'
 import './Login.css'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true)
 
     try {
-      await login(email, password)
+      await login(username, password)
       navigate(ROUTES.dashboard, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao fazer login')
@@ -37,13 +37,13 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="username">Usuário</label>
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="seu_usuario"
               required
               disabled={loading}
             />

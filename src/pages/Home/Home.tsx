@@ -18,7 +18,7 @@ export default function Home() {
         <div className="navbar-content">
           <h1>Dashboard Center</h1>
           <div className="user-section">
-            <span className="user-name">Olá, {user?.name}!</span>
+            <span className="user-name">Olá, {user?.name || user?.username}!</span>
             <button onClick={handleLogout} className="btn-logout">
               Sair
             </button>
@@ -30,7 +30,8 @@ export default function Home() {
         <div className="welcome-card">
           <h2>Bem-vindo ao Dashboard!</h2>
           <p>
-            Você está logado como: <strong>{user?.email}</strong>
+            Você está logado como:{' '}
+            <strong>{user?.email || user?.username || 'Usuário autenticado'}</strong>
           </p>
           <p className="info-text">
             Este é um template inicial. Você pode começar a adicionar seus componentes e páginas aqui.

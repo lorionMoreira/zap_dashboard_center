@@ -4,6 +4,7 @@ export interface User {
   username: string
   email: string
   salt?: string
+  loginComplete?: boolean
 }
 
 export interface AuthApiResponse {
@@ -11,6 +12,7 @@ export interface AuthApiResponse {
   username: string
   salt?: string
   email?: string
+  loginComplete?: boolean
 }
 
 export interface AuthContextType {

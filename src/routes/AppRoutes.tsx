@@ -11,8 +11,8 @@ import DashboardLayout from '../componentes/Layout/DashboardLayout'
 import NotFound from '../pages/NotFound/NotFound'
 import { ROUTES } from './paths'
 
-function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
+function ProtectedRoute({ children, requireLoginComplete = false, allowOnlyIncomplete = false }: { children: ReactNode, requireLoginComplete?: boolean, allowOnlyIncomplete?: boolean }) {
+  const { isAuthenticated, loading, user } = useAuth()
 
   if (loading) {
     return null
@@ -22,25 +22,33 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
     return <Navigate to={ROUTES.login} replace />
   }
 
+  if (requireLoginComplete && !user?.loginComplete) {
+    return <Navigate to={ROUTES.onboarding} replace />
+  }
+
+  if (allowOnlyIncomplete && user?.loginComplete) {
+    return <Navigate to={ROUTES.dashboard} replace />
+  }
+
   return <>{children}</>
 }
 
 function PublicRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user } = useAuth()
 
   if (loading) {
     return null
   }
 
   if (isAuthenticated) {
-    return <Navigate to={ROUTES.onboarding} replace />
+    return <Navigate to={user?.loginComplete ? ROUTES.dashboard : ROUTES.onboarding} replace />
   }
 
   return <>{children}</>
 }
 
 export default function AppRoutes() {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, user } = useAuth()
 
   if (loading) {
     return null
@@ -50,7 +58,7 @@ export default function AppRoutes() {
     <Routes>
       <Route
         path={ROUTES.root}
-        element={<Navigate to={isAuthenticated ? ROUTES.onboarding : ROUTES.login} replace />}
+        element={<Navigate to={isAuthenticated ? (user?.loginComplete ? ROUTES.dashboard : ROUTES.onboarding) : ROUTES.login} replace />}
       />
       <Route
         path={ROUTES.login}
@@ -71,7 +79,7 @@ export default function AppRoutes() {
       <Route
         path={ROUTES.onboarding}
         element={(
-          <ProtectedRoute>
+          <ProtectedRoute allowOnlyIncomplete={true}>
             <Onboarding />
           </ProtectedRoute>
         )}
@@ -79,7 +87,7 @@ export default function AppRoutes() {
       <Route
         path={ROUTES.dashboard}
         element={(
-          <ProtectedRoute>
+          <ProtectedRoute requireLoginComplete={true}>
             <DashboardLayout>
               <Home />
             </DashboardLayout>
@@ -89,7 +97,7 @@ export default function AppRoutes() {
       <Route
         path={ROUTES.chat}
         element={(
-          <ProtectedRoute>
+          <ProtectedRoute requireLoginComplete={true}>
             <DashboardLayout>
               <Chat />
             </DashboardLayout>
@@ -99,7 +107,7 @@ export default function AppRoutes() {
       <Route
         path={ROUTES.connect}
         element={(
-          <ProtectedRoute>
+          <ProtectedRoute requireLoginComplete={true}>
             <DashboardLayout>
               <Connect />
             </DashboardLayout>

@@ -32,7 +32,7 @@ export default function Register() {
 
     try {
       await register(username, email, password)
-      navigate(ROUTES.dashboard, { replace: true })
+      navigate(ROUTES.root, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao criar conta')
     } finally {

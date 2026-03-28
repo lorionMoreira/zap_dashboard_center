@@ -23,6 +23,7 @@ class AuthService {
       username: data.username,
       email: data.email || fallbackEmail,
       salt: data.salt,
+      loginComplete: data.loginComplete,
     }
   }
 
@@ -43,10 +44,11 @@ class AuthService {
     } catch (error) {
       if (apiConfig.mockAuth) {
         const mockUser: User = {
-          id: username,
-          name: username,
-          username,
-          email: '',
+          id: email,
+          name: email.split('@')[0],
+          username: email.split('@')[0],
+          email,
+          loginComplete: true,
         }
         localStorage.setItem(this.TOKEN_KEY, `mock-token-${Date.now()}`)
         localStorage.setItem(this.USER_KEY, JSON.stringify(mockUser))
@@ -78,6 +80,7 @@ class AuthService {
           name: username,
           username,
           email,
+          loginComplete: false,
         }
         localStorage.setItem(this.TOKEN_KEY, `mock-token-${Date.now()}`)
         localStorage.setItem(this.USER_KEY, JSON.stringify(mockUser))

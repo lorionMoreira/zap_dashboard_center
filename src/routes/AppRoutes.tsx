@@ -8,6 +8,7 @@ import Onboarding from '../pages/Onboarding/Onboarding'
 import Chat from '../pages/Chat/Chat'
 import Connect from '../pages/Connect/Connect'
 import DashboardLayout from '../componentes/Layout/DashboardLayout'
+import NotFound from '../pages/NotFound/NotFound'
 import { ROUTES } from './paths'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -32,7 +33,7 @@ function PublicRoute({ children }: { children: ReactNode }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={ROUTES.dashboard} replace />
+    return <Navigate to={ROUTES.onboarding} replace />
   }
 
   return <>{children}</>
@@ -49,7 +50,7 @@ export default function AppRoutes() {
     <Routes>
       <Route
         path={ROUTES.root}
-        element={<Navigate to={isAuthenticated ? ROUTES.dashboard : ROUTES.login} replace />}
+        element={<Navigate to={isAuthenticated ? ROUTES.onboarding : ROUTES.login} replace />}
       />
       <Route
         path={ROUTES.login}
@@ -107,7 +108,7 @@ export default function AppRoutes() {
       />
       <Route
         path="*"
-        element={<Navigate to={isAuthenticated ? ROUTES.dashboard : ROUTES.login} replace />}
+        element={<NotFound />}
       />
     </Routes>
   )

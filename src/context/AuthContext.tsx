@@ -40,6 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const updateUser = (data: Partial<User>) => {
+    const updatedUser = authService.updateUser(data)
+    if (updatedUser) {
+      setUser(updatedUser)
+    }
+  }
+
   const value = {
     user,
     loading,
@@ -47,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout,
     isAuthenticated: !!user,
+    updateUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

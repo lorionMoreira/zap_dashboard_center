@@ -10,8 +10,19 @@ const apiClient = axios.create({
   },
 })
 
-if (apiConfig.authBearerToken) {
-  apiClient.defaults.headers.common.Authorization = `Bearer ${apiConfig.authBearerToken}`
-}
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    } else if (apiConfig.authBearerToken) {
+      config.headers.Authorization = `Bearer ${apiConfig.authBearerToken}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 export default apiClient

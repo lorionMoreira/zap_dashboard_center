@@ -4,6 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../routes/paths'
+import { useAuth } from '../../context/AuthContext'
+import { authService } from '../../services/authService'
 import './Onboarding.css'
 
 const step1Schema = z.object({
@@ -24,7 +26,15 @@ type Step2Data = z.infer<typeof step2Schema>
 export default function Onboarding() {
   const [step, setStep] = useState<1 | 2>(1)
   const [formData, setFormData] = useState<Partial<Step1Data>>({})
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const { logout, updateUser } = useAuth()
+
+  const handleCancel = () => {
+    logout()
+    navigate(ROUTES.login, { replace: true })
+  }
 
   const {
     register: registerStep1,
@@ -47,19 +57,28 @@ export default function Onboarding() {
     setStep(2)
   }
 
-  const onStep2Submit = (data: Step2Data) => {
+  const onStep2Submit = async (data: Step2Data) => {
     const finalData = { ...formData, ...data }
-    console.log('Dados do Onboarding:', finalData)
-    // Here we would typically save this data to the backend API
+    setSubmitError(null)
+    setSubmitting(true)
 
-    navigate(ROUTES.dashboard, { replace: true })
+    try {
+      await authService.completeOnboarding(finalData)
+      updateUser({ loginComplete: true })
+      navigate(ROUTES.dashboard, { replace: true })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao finalizar cadastro'
+      setSubmitError(message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <div className="onboarding-container">
       <div className="onboarding-card">
         <h1>Conclua seu Cadastro</h1>
-        
+
         <div className="step-indicator">
           <div className={`step ${step >= 1 ? 'active' : ''}`}>1. Barbearia</div>
           <div className="step-connector"></div>
@@ -69,7 +88,7 @@ export default function Onboarding() {
         {step === 1 && (
           <form onSubmit={handleSubmitStep1(onStep1Submit)} className="onboarding-form">
             <h2>Dados da Barbearia</h2>
-            
+
             <div className="form-group">
               <label>Nome *</label>
               <input type="text" {...registerStep1('barbeariaNome')} placeholder="Nome da Barbearia" />
@@ -87,14 +106,17 @@ export default function Onboarding() {
               <input type="text" {...registerStep1('barbeariaContato')} placeholder="(00) 00000-0000" />
             </div>
 
-            <button type="submit" className="btn-primary">Próximo</button>
+            <div className="button-group">
+              <button type="button" onClick={handleCancel} className="btn-secondary">Cancelar</button>
+              <button type="submit" className="btn-primary">Próximo</button>
+            </div>
           </form>
         )}
 
         {step === 2 && (
           <form onSubmit={handleSubmitStep2(onStep2Submit)} className="onboarding-form">
             <h2>Dados do Barbeiro</h2>
-            
+
             <div className="form-group">
               <label>Nome *</label>
               <input type="text" {...registerStep2('barbeiroNome')} placeholder="Seu Nome" />
@@ -111,9 +133,13 @@ export default function Onboarding() {
               <input type="text" {...registerStep2('barbeiroPlanoStatus')} placeholder="Ex: Ativo" />
             </div>
 
+            {submitError && <div className="error submit-error">{submitError}</div>}
+
             <div className="button-group">
-              <button type="button" onClick={() => setStep(1)} className="btn-secondary">Voltar</button>
-              <button type="submit" className="btn-primary">Finalizar</button>
+              <button type="button" onClick={() => setStep(1)} className="btn-secondary" disabled={submitting}>Voltar</button>
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? 'Finalizando...' : 'Finalizar'}
+              </button>
             </div>
           </form>
         )}

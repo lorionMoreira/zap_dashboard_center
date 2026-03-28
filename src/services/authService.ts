@@ -114,6 +114,36 @@ class AuthService {
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY)
   }
+
+  updateUser(data: Partial<User>): User | null {
+    const userStr = localStorage.getItem(this.USER_KEY)
+    if (!userStr) return null
+    try {
+      const user = JSON.parse(userStr) as User
+      const updatedUser = { ...user, ...data }
+      localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser))
+      return updatedUser
+    } catch {
+      return null
+    }
+  }
+
+  async completeOnboarding(data: Record<string, unknown>): Promise<void> {
+    try {
+      const response = await apiClient.post<{ success: boolean }>(
+        '/api/onboarding/complete',
+        data,
+      )
+
+      if (!response.data.success) {
+        throw new Error('Falha ao completar onboarding')
+      }
+
+      this.updateUser({ loginComplete: true })
+    } catch (error) {
+      throw new Error(this.getAxiosErrorMessage(error, 'Falha ao completar onboarding'))
+    }
+  }
 }
 
 export const authService = new AuthService()

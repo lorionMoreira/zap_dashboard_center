@@ -26,11 +26,11 @@ class AuthService {
     }
   }
 
-  async login(username: string, password: string): Promise<User> {
+  async login(email: string, password: string): Promise<User> {
     try {
       const response = await apiClient.post<AuthApiResponse>(
-        '/auth/entry',
-        { username, password },
+        '/api/auth/login',
+        { email, password },
       )
 
       const data = response.data
@@ -60,7 +60,7 @@ class AuthService {
   async register(username: string, email: string, password: string): Promise<User> {
     try {
       const response = await apiClient.post<AuthApiResponse>(
-        '/auth/register',
+        '/api/auth/register',
         { username, password, email },
       )
 

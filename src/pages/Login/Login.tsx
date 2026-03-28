@@ -19,7 +19,7 @@ export default function Login() {
 
     try {
       await login(username, password)
-      navigate(ROUTES.dashboard, { replace: true })
+      navigate(ROUTES.onboarding, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao fazer login')
     } finally {

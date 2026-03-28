@@ -1,0 +1,7 @@
+.connect-container {
+  padding: 2rem;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  margin: 1rem;
+}

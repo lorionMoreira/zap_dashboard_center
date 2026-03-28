@@ -1,0 +1,136 @@
+.onboarding-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-color);
+  padding: 2rem;
+}
+
+.onboarding-card {
+  background-color: var(--card-bg);
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px var(--shadow-color);
+  width: 100%;
+  max-width: 500px;
+}
+
+.onboarding-card h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+}
+
+.onboarding-card h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.step-indicator .step {
+  padding: 0.5rem 1rem;
+  background-color: var(--border-color);
+  color: var(--text-color);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.step-indicator .step.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.step-connector {
+  height: 2px;
+  width: 50px;
+  background-color: var(--border-color);
+  margin: 0 10px;
+}
+
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.onboarding-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.onboarding-form label {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.onboarding-form input {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: border-color 0.2s;
+}
+
+.onboarding-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.onboarding-form .error {
+  color: #ff4d4f;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.onboarding-form button {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.onboarding-form .btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  margin-top: 1rem;
+}
+
+.onboarding-form .btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.onboarding-form .btn-secondary {
+  background-color: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  margin-top: 1rem;
+}
+
+.onboarding-form .btn-secondary:hover {
+  background-color: var(--border-color);
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.button-group button {
+  flex: 1;
+}

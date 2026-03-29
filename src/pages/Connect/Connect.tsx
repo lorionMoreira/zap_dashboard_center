@@ -119,6 +119,24 @@ export default function Connect() {
     }
   }, [instanceName])
 
+  const handleDisconnect = async () => {
+    if (!window.confirm('Tem certeza que deseja desconectar o WhatsApp?')) return
+
+    setLoading(true)
+    try {
+      await evolutionService.logoutInstance(instanceName)
+      setConnected(false)
+      setQrCodeData(null)
+      // Recarrega a página para resetar todos os estados e refs de forma limpa
+      window.location.reload()
+    } catch (err: any) {
+      console.error('Erro ao desconectar:', err)
+      setError('Erro ao desconectar. Tente novamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="connect-container">
       <div className="connect-header">
@@ -142,12 +160,29 @@ export default function Connect() {
       {error && <div className="error-message">{error}</div>}
 
       {connected && (
-        <div className="success-message">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ width: '24px', height: '24px' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          Dispositivo conectado com sucesso!
-        </div>
+        <>
+          <div className="success-message">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ width: '24px', height: '24px' }}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Dispositivo conectado com sucesso!
+          </div>
+          
+          <button 
+            className="disconnect-btn" 
+            onClick={handleDisconnect}
+            disabled={loading}
+          >
+            {loading ? <div className="spinner"></div> : (
+              <>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ width: '18px', height: '18px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Desconectar WhatsApp
+              </>
+            )}
+          </button>
+        </>
       )}
 
       {qrCodeData && !connected && (

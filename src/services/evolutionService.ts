@@ -32,7 +32,7 @@ export interface ConnectionStateResponse { // correct
   }
 }
 
-export interface FetchInstancesResponse {
+export interface FetchInstancesResponse {// errada
   instance: {
     instanceName: string
     instanceId: string

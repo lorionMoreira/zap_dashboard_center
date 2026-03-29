@@ -58,7 +58,7 @@ export const evolutionService = {
       qrcode: true,
       integration: 'WHATSAPP-BAILEYS',
     })
-    console.log(response.data)
+
     return response.data
   },
 

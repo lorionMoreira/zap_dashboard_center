@@ -12,6 +12,7 @@ export default function Connect() {
   const [connected, setConnected] = useState(false)
 
   const pollingIntervalRef = useRef<number | null>(null)
+  const initializedRef = useRef<boolean>(false)
 
   // Polling function to check connection status
   const startPolling = (name: string) => {
@@ -20,7 +21,7 @@ export default function Connect() {
     pollingIntervalRef.current = window.setInterval(async () => {
       try {
         const stateData = await evolutionService.getConnectionState(name)
-        if (stateData.instance.state === 'open') {
+        if (stateData?.instance?.state === 'open') {
           setConnected(true)
           setQrCodeData(null)
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current)
@@ -34,57 +35,76 @@ export default function Connect() {
   useEffect(() => {
     if (!instanceName) return
 
+    // Previne chamadas duplicadas no React Strict Mode
+    if (initializedRef.current) return
+    initializedRef.current = true
+
     const initialize = async () => {
       setLoading(true)
       setError(null)
 
       try {
-        // 1. Check if instance already exists and is connected
-        const stateData = await evolutionService.getConnectionState(instanceName)
-        console.log('stateData')
-        console.log(stateData)
-        if (stateData.instance.state === 'open') {
-          setConnected(true)
-          setLoading(false)
-          return
-        }
+        // 1. Verifica se a instância já existe na lista
+        const instances = await evolutionService.fetchInstances()
+        // Evolution API pode retornar em formatos diferentes dependendo da versão, tenta cobrir ambos
+        const exists = instances.some((inst: any) =>
+          inst.instance?.instanceName === instanceName || inst.name === instanceName
+        )
 
-        // 2. Instance exists but disconnected — try to reconnect and get QR
-        const connectResponse = await evolutionService.connectInstance(instanceName)
-        if (connectResponse.base64) {
-          setQrCodeData(connectResponse.base64)
-          startPolling(instanceName)
-        }
-      } catch {
-        // 3. Instance doesn't exist yet — create it and get QR
-        try {
+        if (exists) {
+          // 2. Se já existe, checa o estado 
+          const stateData = await evolutionService.getConnectionState(instanceName)
+
+          console.log('stateData')
+          console.log(stateData)
+          // se open - conectado
+          // se close - desconectado
+
+          if (stateData?.instance?.state === 'open') {
+            setConnected(true)
+            setLoading(false)
+            return
+          }
+
+          // Instância não está conectada — tenta pegar o QR code
+          const connectResponse = await evolutionService.connectInstance(instanceName)
+          if (connectResponse?.base64) {
+            setQrCodeData(connectResponse.base64)
+            startPolling(instanceName)
+          } else if (connectResponse?.instance?.state === 'open') {
+            setConnected(true)
+          }
+        } else {
+          // 3. Se não existe — cria e pega o QR code
           const response = await evolutionService.createInstance(instanceName)
 
-          if (response.qrcode && response.qrcode.base64) {
+          if (response?.qrcode && response.qrcode.base64) {
             setQrCodeData(response.qrcode.base64)
             startPolling(instanceName)
           } else if (response?.instance?.status === 'open') {
             setConnected(true)
           } else {
-            // Created but no QR — try connect endpoint
+            // Criado mas sem QR — tenta no endpoint de connect
             const connectResponse = await evolutionService.connectInstance(instanceName)
-            if (connectResponse.base64) {
+            if (connectResponse?.base64) {
               setQrCodeData(connectResponse.base64)
               startPolling(instanceName)
-            } else if (connectResponse.instance?.state === 'open') {
+            } else if (connectResponse?.instance?.state === 'open') {
               setConnected(true)
             } else {
               setError('Não foi possível gerar o QR Code. Tente novamente mais tarde.')
             }
           }
-        } catch (err: any) {
-          console.error(err)
-          setError(
-            err.response?.data?.message ||
-            err.message ||
-            'Erro ao conectar com a Evolution API. Verifique se a API está rodando.'
-          )
         }
+      } catch (err: any) {
+        console.error('Erro na inicialização:', err)
+        setError(
+          err.response?.data?.message ||
+          err?.message ||
+          'Erro ao conectar com a Evolution API. Verifique se a API está rodando.'
+        )
+        // Reset o ref caso de erro para permitir tentar novamente interagindo ou recarregando
+        initializedRef.current = false
       } finally {
         setLoading(false)
       }
@@ -93,7 +113,9 @@ export default function Connect() {
     initialize()
 
     return () => {
-      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current)
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+      }
     }
   }, [instanceName])
 

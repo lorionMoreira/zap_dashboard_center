@@ -25,14 +25,30 @@ export interface CreateInstanceResponse {
   }
 }
 
-export interface ConnectionStateResponse {
+export interface ConnectionStateResponse { // correct
   instance: {
     instanceName: string
     state: string
   }
 }
 
+export interface FetchInstancesResponse {
+  instance: {
+    instanceName: string
+    instanceId: string
+    status: string
+  }
+}
+
 export const evolutionService = {
+  /**
+   * Fetches all existing instances from the Evolution API.
+   */
+  async fetchInstances(): Promise<FetchInstancesResponse[]> {
+    const response = await evolutionClient.get<FetchInstancesResponse[]>('/instance/fetchInstances')
+    return response.data
+  },
+
   /**
    * Creates a new instance in Evolution API v2 and returns the QR Code.
    */
